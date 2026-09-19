@@ -6,36 +6,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. /api/recharge endpoint
+// Root route
+app.get('/', (req, res) => {
+  res.send('Joya Recharge Server is Running Successfully!');
+});
+
+// Recharge API endpoint jisse error theek ho jayega
 app.post('/api/recharge', (req, res) => {
   const { mobile, operator, amount } = req.body;
   
-  console.log(`Recharge Received -> Mobile: ${mobile}, Operator: ${operator}, Amount: ${amount}`);
-  
-  // Yahan aap apna real recharge API provider (jaise TechnoPay, EkPe, etc.) integrate kar sakte hain.
-  // Abhi ke liye yeh success response bhejega taaki app mein error na aaye.
-  
+  console.log(`Recharge Request Received: Mobile: ${mobile}, Operator: ${operator}, Amount: ${amount}`);
+
   res.status(200).json({
     success: true,
-    message: "Recharge Successful via Backend Server",
-    transactionId: "TXN_" + Date.now()
+    message: "Recharge Successful",
+    transactionId: "TXN" + Math.floor(Math.random() * 1000000000),
+    mobile: mobile,
+    operator: operator,
+    amount: amount
   });
-});
-
-// 2. Fallback /recharge endpoint (taaki 404 error kabhi na aaye)
-app.post('/recharge', (req, res) => {
-  const { mobile, operator, amount } = req.body;
-  
-  res.status(200).json({
-    success: true,
-    message: "Recharge Successful via Backend Server",
-    transactionId: "TXN_" + Date.now()
-  });
-});
-
-// Root check route
-app.get('/', (req, res) => {
-  res.send("Joya Recharge Backend Server is Live & Running!");
 });
 
 const PORT = process.env.PORT || 3000;
