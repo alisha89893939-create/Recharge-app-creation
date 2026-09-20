@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Pay2All API Configuration
 const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
-const PAY2ALL_API_TOKEN = "t2a_5464fb66_e1d260b245d5e1292c0b49bfab93ba688517d70f46d585f";
+const PAY2ALL_API_TOKEN = "t2a_3d452435_97692a874a383ccb86529a959c154f9524d4ed356749e8c6";
 
 // Operator Keys to Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
