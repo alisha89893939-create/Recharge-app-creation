@@ -36,7 +36,10 @@ app.post('/api/recharge', async (req, res) => {
 
         let providerId;
 
-        if (OPERATOR_IDS[operator]) {
+        // Agar frontend se seedha number (ID) aa raha hai ya text name aa raha hai
+        if (!isNaN(operator)) {
+            providerId = Number(operator);
+        } else if (OPERATOR_IDS[operator]) {
             providerId = OPERATOR_IDS[operator];
         } else {
             const opkey = String(operator).toLowerCase().trim();
