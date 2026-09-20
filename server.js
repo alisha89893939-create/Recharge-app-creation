@@ -8,9 +8,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Pay2All API Configuration
+// Pay2All API Configuration (नवीन टोकन अपडेट केला आहे)
 const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
-const PAY2ALL_API_TOKEN = "t2a_c653923d_9c53bf9e2ea22632f4d877def2acf4349532a4ef364336ad";
+const PAY2ALL_API_TOKEN = process.env.PAY2ALL_API_TOKEN || "t2a_d7418c39_abbd646be51d6f6edba598856c95074ee18f408ad4871d60";
 
 // Operator Name se Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
@@ -83,3 +83,4 @@ app.post('/recharge', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
