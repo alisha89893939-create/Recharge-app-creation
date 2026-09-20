@@ -14,19 +14,11 @@ const PAY2ALL_API_TOKEN = "t2a_c653923d_9c53bf9e2ea22632f4d877def2acf4349532a4ef
 
 // Operator Name se Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
-    // Mobile Operators
-    "jio": 1,
-    "airtel": 2,
-    "vi": 3,
-    "vodafone": 3,
-    "bsnl": 4,
-
-    // DTH Operators
-    "tata play": 10,
-    "airtel digital tv": 11,
-    "sun direct": 12,
-    "dish tv": 13,
-    "d2h": 14
+    "jio": 3,
+    "airtel": 1,
+    "vi": 2,
+    "vodafone": 2,
+    "bsnl": 4
 };
 
 app.post('/api/recharge', async (req, res) => {
@@ -53,7 +45,7 @@ app.post('/api/recharge', async (req, res) => {
 
         console.log("Sending payload to Pay2All:", payload);
 
-        // Pay2All Live API Request with correct token and headers
+        // Pay2All Live API Request
         const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
             headers: {
                 'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
@@ -74,7 +66,6 @@ app.post('/api/recharge', async (req, res) => {
     }
 });
 
-// Support both /api/recharge and /recharge routes
 app.post('/recharge', async (req, res) => {
     req.url = '/api/recharge';
     return app._router.handle(req, res);
