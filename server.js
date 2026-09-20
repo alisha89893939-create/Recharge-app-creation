@@ -3,100 +3,73 @@ const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-const PAY2ALL_TOKEN = 't2a_51f7471a_c6bee77382e9009fdc9b888a446067019c55ed9ca8bb5ddf';
-const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
+// Pay2All API Configuration
+const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
+const PAY2ALL_API_TOKEN = "your_pay2all_api_token_here";
 
-// Operator Name se Pay2All Provider ID mapping dictionary (Updated)
+// Operator Name to Pay2All Provider ID mapping dictionary (As per Pay2All Support)
 const OPERATOR_IDS = {
-    // Mobile Operators
-    "Jio": 2,
-    "Airtel": 1,
-    "Vi": 3,
-    "BSNL": 4,
-
-    // DTH Operators
-    "Tata Play": 10,
-    "Airtel Digital TV": 11,
-    "Sun Direct": 12,
-    "Dish TV": 13,
-    "D2H": 14
+  "jio": 2,
+  "airtel": 1,
+  "vi": 3,
+  "vodafone": 3,
+  "bsnl": 4
 };
 
-const handleRecharge = async (req, res) => {
-    try {
-        console.log('--- INCOMING RECHARGE REQUEST ---');
-        console.log('Request Body:', req.body);
+app.post('/api/recharge', async (req, res) => {
+  try {
+    const { mobile, amount, operator } = req.body;
 
-        const { mobile, amount, operator, client_id } = req.body;
-
-        if (!mobile || !amount || !operator) {
-            return res.status(400).json({
-                status: 'failure',
-                message: 'Missing required fields (mobile, amount, or operator)'
-            });
-        }
-
-        let providerId;
-        const opKey = String(operator).trim();
-
-        if (!isNaN(opKey)) {
-            providerId = Number(opKey);
-        } else {
-            // Case-insensitive match check
-            const matchedKey = Object.keys(OPERATOR_IDS).find(
-                key => key.toLowerCase() === opKey.toLowerCase()
-            );
-            providerId = matchedKey ? OPERATOR_IDS[matchedKey] : null;
-        }
-
-        if (!providerId) {
-            return res.status(400).json({
-                status: 'failure',
-                message: 'Invalid operator specified'
-            });
-        }
-
-        const payload = {
-            client_id: client_id || "1",
-            provider_id: providerId,
-            number: mobile,
-            amount: amount
-        };
-
-        console.log('Sending payload to Pay2All:', payload);
-
-        const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
-            headers: {
-                'Authorization': `Bearer ${PAY2ALL_TOKEN}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log('Pay2All Success Response:', response.data);
-        return res.json(response.data);
-
-    } catch (error) {
-        console.error('Pay2All API Error:', error.response?.data || error.message);
-        return res.status(500).json({
-            status: 'failure',
-            message: error.response?.data?.message || error.message
-        });
+    if (!mobile || !amount || !operator) {
+      return res.status(400).json({ status: "FAIL", message: "Missing required fields" });
     }
-};
 
-app.post('/api/recharge', handleRecharge);
+    // Operator name in lowercase karke sahi provider id nikalna
+    const mapKey = operator.toLowerCase();
+    const providerId = OPERATOR_IDS[mapKey];
 
-app.get('/api/recharge/ping', (req, res) => {
-    res.json({ status: 'App/Recharge working' });
+    // Pay2All API Payload structure
+    const payload = {
+      client_id: "1",
+      provider_id: providerId,
+      number: mobile,
+      amount: Number(amount)
+    };
+
+    console.log("Sending payload to Pay2All:", payload);
+
+    // Pay2All Live API Request
+    const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
+      headers: {
+        'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log("Pay2All Success Response:", response.data);
+    return res.json(response.data);
+
+  } catch (error) {
+    console.error("Pay2All API Error Response:", error.response?.data || error.message);
+    return res.status(500).json({
+      status: "FAIL",
+      message: error.response?.data?.message || error.message
+    });
+  }
+});
+
+app.post('/api/recharge-margin', (req, res) => {
+  req.url = '/api/recharge';
+  return app._router.handle(req, res);
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
 
