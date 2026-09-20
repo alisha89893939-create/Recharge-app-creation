@@ -19,17 +19,16 @@ const handleRecharge = async (req, res) => {
         const { mobile, amount, operator, provider_id, provider, operator_id, client_id } = req.body;
 
         // Operator name ko provider_id me map karne ke liye
-        let finalProviderId = 1; // Default fallback
+        let finalProviderId = 1; 
         const opName = String(operator || provider || '').toLowerCase();
 
         if (opName.includes('jio')) {
-            finalProviderId = 1; // Apne Pay2All dashboard ke hisab se Jio ka ID yahan set karein
+            finalProviderId = 1; 
         } else if (opName.includes('airtel')) {
-            finalProviderId = 2; // Airtel ID
+            finalProviderId = 2; 
         } else if (opName.includes('vi') || opName.includes('vodafone')) {
-            finalProviderId = 3; // Vi ID
+            finalProviderId = 3; 
         } else {
-            // Agar pehle se koi number ya provider_id bheja hai toh usko use karein
             const rawProvider = provider_id || operator_id || operator;
             if (!isNaN(rawProvider) && rawProvider !== '') {
                 finalProviderId = Number(rawProvider);
@@ -49,7 +48,8 @@ const handleRecharge = async (req, res) => {
             client_id: txn_id,
             provider_id: finalProviderId,
             number: String(mobile),
-            amount: Number(amount)
+            amount: Number(amount),
+            mode: "LIVE" // Live recharge ke liye mode LIVE set kiya gaya hai[span_1](start_span)[span_1](end_span)
         };
 
         console.log('Sending payload to Pay2All:', payload);
