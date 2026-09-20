@@ -6,11 +6,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Pay2All API Configuration (Pura aur Sahi URL)
-const PAY2ALL_API_URL = "https://pay2all.in/api/v1/recharge";
-const PAY2ALL_TOKEN = "YTE1NzJiMWZhNjI1ZDBlOWZhNzFiNWQwMWNmMTczMTE="; // Aapka API Token
+// Pay2All API Configuration
+const PAY2ALL_TOKEN = "t2a_17b193fd_ee29014459bb0d0ef1e98bb13f7a1f02c30ede8f9392aebd"; 
+const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
 
-app.post('/api/recharge', async (req, res) => {
+app.post('/recharge', async (req, res) => {
     try {
         const { mobile, amount, operator, client_id } = req.body;
 
@@ -18,20 +18,20 @@ app.post('/api/recharge', async (req, res) => {
             return res.status(400).json({ status: "failure", message: "Missing required fields" });
         }
 
-        const txnId = client_id || 'TXN_' + Date.now();
+        const txn_id = client_id || "TXN" + Date.now();
 
-        // Pay2All API ke mutabiq sahi Payload structure
+        // Pay2All API Payload structure
         const payload = {
-            client_id: txnId,
-            provider_id: operator, // Jaise Jio, Airtel etc.
+            client_id: txn_id,
+            provider_id: operator, 
             number: mobile,
             amount: Number(amount)
         };
 
         console.log("Sending payload to Pay2All:", payload);
 
-        // Pay2All Live API ko request bhejna
-        const response = await axios.post(PAY2ALL_API_URL, payload, {
+        // Pay2All Live API request
+        const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
             headers: {
                 'Authorization': `Bearer ${PAY2ALL_TOKEN}`,
                 'Content-Type': 'application/json',
@@ -51,12 +51,8 @@ app.post('/api/recharge', async (req, res) => {
     }
 });
 
-app.post('/recharge', async (req, res) => {
-    return app._router.handle({ ...req, url: '/api/recharge' }, res);
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
 
