@@ -12,14 +12,21 @@ app.use(express.json());
 const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
 const PAY2ALL_API_TOKEN = "t2a_c653923d_9c53bf9e2ea22632f4d877def2acf4349532a4ef364336ad";
 
-// Updated Operator Name to Pay2All Provider ID mapping dictionary
+// Operator Name se Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
-    "jio": 2,
-    "airtel": 1,
+    // Mobile Operators
+    "jio": 1,
+    "airtel": 2,
     "vi": 3,
-    "vi (vodafone idea)": 3,
     "vodafone": 3,
-    "bsnl": 4
+    "bsnl": 4,
+
+    // DTH Operators
+    "tata play": 10,
+    "airtel digital tv": 11,
+    "sun direct": 12,
+    "dish tv": 13,
+    "d2h": 14
 };
 
 app.post('/api/recharge', async (req, res) => {
@@ -34,15 +41,7 @@ app.post('/api/recharge', async (req, res) => {
 
         // Operator name ko lowercase karke sahi provider_id nikalna
         const opKey = String(operator).trim().toLowerCase();
-        let providerId = OPERATOR_IDS[opKey];
-
-        if (!providerId) {
-            if (opKey.includes('jio')) providerId = 2;
-            else if (opKey.includes('airtel')) providerId = 1;
-            else if (opKey.includes('vi') || opKey.includes('vodafone')) providerId = 3;
-            else if (opKey.includes('bsnl')) providerId = 4;
-            else providerId = Number(operator) || 1;
-        }
+        let providerId = OPERATOR_IDS[opKey] || Number(operator) || 1;
 
         // Pay2All API Payload structure
         const payload = {
@@ -54,7 +53,7 @@ app.post('/api/recharge', async (req, res) => {
 
         console.log("Sending payload to Pay2All:", payload);
 
-        // Pay2All Live API Request
+        // Pay2All Live API Request with correct token and headers
         const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
             headers: {
                 'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
@@ -75,6 +74,7 @@ app.post('/api/recharge', async (req, res) => {
     }
 });
 
+// Support both /api/recharge and /recharge routes
 app.post('/recharge', async (req, res) => {
     req.url = '/api/recharge';
     return app._router.handle(req, res);
