@@ -12,6 +12,8 @@ const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
 // Common recharge logic function
 const handleRecharge = async (req, res) => {
     try {
+        console.log('--- SUCCESSFUL INCOMING REQUEST ---');
+        console.log('Requested URL Path:', req.path);
         console.log('Incoming Request Body:', req.body);
 
         const { mobile, amount, operator, provider_id, provider, operator_id, client_id } = req.body;
@@ -58,11 +60,13 @@ const handleRecharge = async (req, res) => {
     }
 };
 
-// Dono endpoints ko handle karne ke liye
+// Sabhi possible routes ko handle karega (Chahe app kahin bhi request bheje)
 app.post('/recharge', handleRecharge);
 app.post('/api/recharge', handleRecharge);
+app.post('/*/recharge', handleRecharge); // Agar beech me koi aur folder path ho
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
