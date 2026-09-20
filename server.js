@@ -12,7 +12,7 @@ app.use(express.json());
 const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
 const PAY2ALL_API_TOKEN = "t2a_5464fb66_e1d260b245d5e1292c0b49bfab93ba688517d70f46d585f";
 
-// Operator Keys to Pay2All Provider ID mapping dictionary (As per Pay2All Support)
+// Operator Keys to Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
   "jio": 2,
   "airtel": 1,
@@ -26,20 +26,26 @@ app.post('/api/recharge', async (req, res) => {
     const { mobile, amount, operator } = req.body;
     console.log("Received request data:", { mobile, amount, operator });
 
-    if (!mobile || !amount || !operator) {
+    if (!mobile || !amount || operator === undefined || operator === null) {
       return res.status(400).json({ status: "FAIL", message: "Missing required fields" });
     }
 
-    // Operator name ko clean aur lowercase karna
-    const opKey = operator.toLowerCase().trim();
-    let providerId = OPERATOR_IDS[opKey];
+    let providerId;
 
-    // Agar direct match na ho toh check karein ki operator mein kya likha hai
-    if (!providerId) {
-      if (opKey.includes('jio')) providerId = 2;
-      else if (opKey.includes('airtel')) providerId = 1;
-      else if (opKey.includes('vi') || opKey.includes('vodafone')) providerId = 3;
-      else if (opKey.includes('bsnl')) providerId = 4;
+    // Agar app se seedha number (jaise '2') aa raha hai
+    if (!isNaN(operator)) {
+      providerId = Number(operator);
+    } else {
+      // Agar operator ka naam aa raha hai (jaise 'Jio')
+      const opKey = String(operator).toLowerCase().trim();
+      providerId = OPERATOR_IDS[opKey];
+
+      if (!providerId) {
+        if (opKey.includes('jio')) providerId = 2;
+        else if (opKey.includes('airtel')) providerId = 1;
+        else if (opKey.includes('vi') || opKey.includes('vodafone')) providerId = 3;
+        else if (opKey.includes('bsnl')) providerId = 4;
+      }
     }
 
     if (!providerId) {
