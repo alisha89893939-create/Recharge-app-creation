@@ -8,9 +8,9 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// Pay2All API Configuration (v1 update kiya gaya hai)
+// Pay2All API Configuration
 const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
-const PAY2ALL_API_TOKEN = "Aapka_Pay2All_API_Token_Yahan_Dalein"; // Apna token yahan dalein
+const PAY2ALL_API_TOKEN = "T2a_4a9cdce8_7928e6703622d2f6504e47e50c08a943633eb6acca17715c";
 
 // Operator Keys to Operator ID mapping dictionary
 const OPERATOR_IDS = {
