@@ -9,13 +9,13 @@ app.use(cors());
 const PAY2ALL_TOKEN = 't2a_c653923d_9c53bf9e2ea22632f4d877def2acf4349532a4ef364336ad'; 
 const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
 
-app.post('/recharge', async (req, res) => {
+// Common recharge logic function
+const handleRecharge = async (req, res) => {
     try {
-        console.log('Incoming Request Body:', req.body); // Yeh check karne ke liye ki app se kya data aa raha hai
+        console.log('Incoming Request Body:', req.body);
 
         const { mobile, amount, operator, provider_id, provider, operator_id, client_id } = req.body;
 
-        // Agar app se koi operator id nahi aa rahi, toh by default 1 (Jio/Operator ID) le lega taaki NaN na ho
         const rawProvider = operator || provider_id || provider || operator_id || 1;
         const finalProviderId = Number(rawProvider);
 
@@ -56,10 +56,13 @@ app.post('/recharge', async (req, res) => {
             message: error.response?.data?.message || error.message || 'An error occurred during recharge'
         });
     }
-});
+};
+
+// Dono endpoints ko handle karne ke liye
+app.post('/recharge', handleRecharge);
+app.post('/api/recharge', handleRecharge);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
