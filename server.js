@@ -14,9 +14,9 @@ const PAY2ALL_API_TOKEN = "t2a_c653923d_9c53bf9e2ea22632f4d877def2acf4349532a4ef
 
 // Operator Name se Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
-    "jio": 3,
+    "jio": 2,
     "airtel": 1,
-    "vi": 2,
+    "vi": 3,
     "vodafone": 2,
     "bsnl": 4
 };
