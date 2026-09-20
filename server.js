@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// Pay2All API Configuration
-const PAY2ALL_BASE_URL = "https://pay2all.in/api/v2";
+// Pay2All API Configuration (v1 update kiya gaya hai)
+const PAY2ALL_BASE_URL = "https://pay2all.in/api/v1";
 const PAY2ALL_API_TOKEN = "Aapka_Pay2All_API_Token_Yahan_Dalein"; // Apna token yahan dalein
 
 // Operator Keys to Operator ID mapping dictionary
@@ -36,11 +36,9 @@ app.post('/api/recharge', async (req, res) => {
 
     let providerId;
 
-    // Agar app se seedha number (jaise '1' ya '2') aa raha ho
     if (!isNaN(operator)) {
       providerId = Number(operator);
     } else {
-      // Agar operator ka naam aa raha hai (jaise 'jio')
       const opKey = String(operator).toLowerCase().trim();
       providerId = OPERATOR_IDS[opKey];
 
@@ -56,7 +54,6 @@ app.post('/api/recharge', async (req, res) => {
       return res.status(400).json({ status: "FAIL", message: "Invalid operator specified" });
     }
 
-    // Pay2All API payload structure
     const payload = {
       client_id: "1",
       provider_id: providerId,
@@ -66,7 +63,6 @@ app.post('/api/recharge', async (req, res) => {
 
     console.log("Sending payload to Pay2All:", payload);
 
-    // Pay2All From API Request
     const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
       headers: {
         'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
