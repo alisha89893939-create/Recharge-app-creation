@@ -6,8 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Pay2All API Configuration
-const PAY2ALL_TOKEN = 't2c_i7b... apna token yahan rakhein'; 
+// Pay2All API Configuration with your new token
+const PAY2ALL_TOKEN = 't2a_c653923d_9c53bf9e2ea22632f4d877def2acf4349532a4ef364336ad'; 
 const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
 
 app.post('/recharge', async (req, res) => {
@@ -27,8 +27,8 @@ app.post('/recharge', async (req, res) => {
         // Pay2All API Payload structure
         const payload = {
             client_id: txn_id,
-            provider_id: operator,
-            number: mobile,
+            provider_id: Number(operator),
+            number: String(mobile),
             amount: Number(amount)
         };
 
