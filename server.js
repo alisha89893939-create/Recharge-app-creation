@@ -18,13 +18,28 @@ const handleRecharge = async (req, res) => {
 
         const { mobile, amount, operator, provider_id, provider, operator_id, client_id } = req.body;
 
-        const rawProvider = operator || provider_id || provider || operator_id || 1;
-        const finalProviderId = Number(rawProvider);
+        // Operator name ko provider_id me map karne ke liye
+        let finalProviderId = 1; // Default fallback
+        const opName = String(operator || provider || '').toLowerCase();
 
-        if (!mobile || !amount || isNaN(finalProviderId)) {
+        if (opName.includes('jio')) {
+            finalProviderId = 1; // Apne Pay2All dashboard ke hisab se Jio ka ID yahan set karein
+        } else if (opName.includes('airtel')) {
+            finalProviderId = 2; // Airtel ID
+        } else if (opName.includes('vi') || opName.includes('vodafone')) {
+            finalProviderId = 3; // Vi ID
+        } else {
+            // Agar pehle se koi number ya provider_id bheja hai toh usko use karein
+            const rawProvider = provider_id || operator_id || operator;
+            if (!isNaN(rawProvider) && rawProvider !== '') {
+                finalProviderId = Number(rawProvider);
+            }
+        }
+
+        if (!mobile || !amount) {
             return res.status(400).json({ 
                 status: 'failure', 
-                message: 'Invalid or missing fields (mobile, amount, or operator)' 
+                message: 'Invalid or missing fields (mobile or amount)' 
             });
         }
 
@@ -60,10 +75,10 @@ const handleRecharge = async (req, res) => {
     }
 };
 
-// Sabhi possible routes ko handle karega (Chahe app kahin bhi request bheje)
+// Sabhi possible routes ko handle karega
 app.post('/recharge', handleRecharge);
 app.post('/api/recharge', handleRecharge);
-app.post('/*/recharge', handleRecharge); // Agar beech me koi aur folder path ho
+app.post('/*/recharge', handleRecharge);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
