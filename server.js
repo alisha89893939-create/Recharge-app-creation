@@ -3,31 +3,33 @@ const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+
 app.use(cors());
 app.use(express.json());
 
-// Pay2All API Configuration (apna env ya values use karein)
-const PAY2ALL_BASE_URL = process.env.PAY2ALL_BASE_URL || 'https://pay2all.in/api/v1';
-const PAY2ALL_API_TOKEN = process.env.PAY2ALL_API_TOKEN || '1254_d7118cb9eae6f56eec5ef208536f982998ae0ce6';
+// Pay2All API Configuration (Aapka original token yahan set hai)
+const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
+const PAY2ALL_API_TOKEN = '1254_d7118cb9eae6f56eec5ef208536f982998ae0ce6';
 
-// Operator Name se Pay2All Provider ID mapping dictionary
+// Operator Name se Pay2All Provider ID mapping dictionary (New services added)
 const OPERATOR_IDS = {
   // Mobile Operators
-  "1": 1, // Airtel
-  "2": 2, // Jio
-  "3": 3, // Vi
-  "4": 4, // BSNL
+  "1": 1, 
+  "2": 2, 
+  "3": 3, 
+  "4": 4, 
   "vodafone": 3,
   "jio": 2,
   "airtel": 1,
   "bsnl": 4,
 
   // DTH Operators
-  "10": 10, // Tata Play
-  "11": 11, // Airtel Digital TV
-  "12": 12, // Sun Direct
-  "13": 13, // Dish TV
-  "14": 14, // D2H
+  "10": 10, 
+  "11": 11, 
+  "12": 12, 
+  "13": 13, 
+  "14": 14, 
   "tata play": 10,
   "airtel digital tv": 11,
   "sun direct": 12,
@@ -35,23 +37,23 @@ const OPERATOR_IDS = {
   "d2h": 14,
 
   // Electricity Operators
-  "20": 20, // Adani Electricity
-  "21": 21, // TATA Power
-  "22": 22, // SBPDCL (Bihar)
-  "23": 23, // UPPCL
+  "20": 20, 
+  "21": 21, 
+  "22": 22, 
+  "23": 23,
 
   // Gas Operators
-  "30": 30, // Indane Gas
-  "31": 31, // HP Gas
-  "32": 32, // Bharat Gas
+  "30": 30, 
+  "31": 31, 
+  "32": 32,
 
   // Broadband Operators
-  "40": 40, // Airtel Xstream
-  "41": 41, // JioFiber
-  "42": 42  // ACT Fibernet
+  "40": 40, 
+  "41": 41, 
+  "42": 42
 };
 
-app.post(['/api/recharge', '/recharge'], async (req, res) => {
+const handleRecharge = async (req, res) => {
   try {
     const { mobile, amount, operator, client_id } = req.body;
 
@@ -93,9 +95,12 @@ app.post(['/api/recharge', '/recharge'], async (req, res) => {
       message: error.response?.data?.message || error.message
     });
   }
-});
+};
 
-const PORT = process.env.PORT || 5000;
+// Map both /api/recharge and /recharge routes
+app.post('/api/recharge', handleRecharge);
+app.post('/recharge', handleRecharge);
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
