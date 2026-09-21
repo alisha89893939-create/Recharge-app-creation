@@ -8,49 +8,87 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// Pay2All API Configuration (Updated with your new token)
+// Pay2All API Configuration
 const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
 const PAY2ALL_API_TOKEN = 't2a_43094c42_ca0a3a61223886a18985576ddb010eb0a86c9490652f1d74';
 
-// Operator Name se Pay2All Provider ID mapping dictionary
+// Updated Provider IDs Mapping Dictionary (Screenshots & Support List ke mutabiq)
 const OPERATOR_IDS = {
-  // Mobile Operators
-  "1": 1, 
-  "2": 2, 
-  "3": 3, 
-  "4": 4, 
-  "vodafone": 3,
-  "jio": 2,
+  // Mobile Recharge
   "airtel": 1,
+  "jio": 2,
+  "vi": 3,
+  "vodafone idea": 3,
   "bsnl": 4,
 
-  // DTH Operators
-  "10": 10, 
-  "11": 11, 
-  "12": 12, 
-  "13": 13, 
-  "14": 14, 
-  "tata play": 10,
-  "airtel digital tv": 11,
-  "sun direct": 12,
-  "dish tv": 13,
-  "d2h": 14,
+  // DTH Recharge
+  "tata play": 5,
+  "airtel digital tv": 6,
+  "dish tv": 7,
+  "d2h": 8,
+  "sun direct": 9,
 
-  // Electricity Operators
-  "20": 20, 
-  "21": 21, 
-  "22": 22, 
+  // Account Verification
+  "bank account verify": 10,
+  "verify_bank": 10,
+  "upi verify": 11,
+  "verify_upi": 11,
+
+  // Recharge & Bills / Bill Payment
+  "bill payment": 13,
+  "bill_payment": 13,
+
+  // Travel
+  "flight booking": 14,
+  "flight_booking": 14,
+  "bus booking": 20,
+  "bus_booking": 20,
+  "tour packages": 21,
+  "tour_packages": 21,
+
+  // Money Transfer
+  "dmt": 15,
+
+  // eChallan
+  "echallan lookup": 16,
+  "echallan_lookup": 16,
+
+  // CRM
+  "crm": 17,
+
+  // AEPS Banking
+  "cash withdrawal": 22,
+  "acw": 22,
+  "balance enquiry": 23,
+  "abe": 23,
+  "mini statement": 24,
+  "ams": 24,
+  "cash deposit": 25,
+  "acd": 25,
+
+  // Direct Number keys mapping
+  "1": 1,
+  "2": 2,
+  "3": 3,
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  "7": 7,
+  "8": 8,
+  "9": 9,
+  "10": 10,
+  "11": 11,
+  "13": 13,
+  "14": 14,
+  "15": 15,
+  "16": 16,
+  "17": 17,
+  "20": 20,
+  "21": 21,
+  "22": 22,
   "23": 23,
-
-  // Gas Operators
-  "30": 30, 
-  "31": 31, 
-  "32": 32,
-
-  // Broadband Operators
-  "40": 40, 
-  "41": 41, 
-  "42": 42
+  "24": 24,
+  "25": 25
 };
 
 const handleRecharge = async (req, res) => {
@@ -63,7 +101,7 @@ const handleRecharge = async (req, res) => {
 
     const txn_id = client_id || "TXN_" + Date.now();
 
-    // Operator number ya string se provider_id nikalna
+    // Operator name ya number se exact provider_id nikalna
     const provider_id = OPERATOR_IDS[String(operator).toLowerCase()] || Number(operator) || 1;
 
     // Pay2All API Payload Structure
@@ -104,4 +142,5 @@ app.post('/recharge', handleRecharge);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
