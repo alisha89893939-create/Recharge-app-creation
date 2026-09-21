@@ -8,11 +8,11 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// Pay2All API Configuration (Aapka original token yahan set hai)
+// Pay2All API Configuration (Updated with your new token)
 const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
-const PAY2ALL_API_TOKEN = '1254_d7118cb9eae6f56eec5ef208536f982998ae0ce6';
+const PAY2ALL_API_TOKEN = 't2a_43094c42_ca0a3a61223886a18985576ddb010eb0a86c9490652f1d74';
 
-// Operator Name se Pay2All Provider ID mapping dictionary (New services added)
+// Operator Name se Pay2All Provider ID mapping dictionary
 const OPERATOR_IDS = {
   // Mobile Operators
   "1": 1, 
