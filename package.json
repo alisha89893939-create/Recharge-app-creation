@@ -1,117 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-app.use(cors());
-app.use(express.json());
-
-// Pay2All API Configuration
-const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
-const PAY2ALL_API_TOKEN = 't2a_43094c42_ca0a3a61223886a18985576ddb010eb0a86c9490652f1d74';
-
-// Operator ID Mapping Dictionary
-const OPERATOR_IDS = {
-  "airtel": 1,
-  "jio": 2,
-  "vi": 3,
-  "vodafone idea": 3,
-  "bsnl": 4,
-  "tata play": 5,
-  "airtel digital tv": 6,
-  "dish tv": 7,
-  "d2h": 8,
-  "sun direct": 9,
-  "bank account verify": 10,
-  "verify_bank": 10,
-  "upi verify": 11,
-  "verify_upi": 11,
-  "bill payment": 13,
-  "flight booking": 14,
-  "dmt": 15,
-  "echallan lookup": 16,
-  "crm": 17,
-  "bus booking": 20,
-  "tour packages": 21,
-  "cash withdrawal": 22,
-  "balance enquiry": 23,
-  "mini statement": 24,
-  "cash deposit": 25,
-  // Direct numbers mapping
-  "1": 1, "2": 2, "3": 3, "4": 4, "5": 5,
-  "6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
-  "11": 11, "13": 13, "14": 14, "15": 15, "16": 16,
-  "17": 17, "20": 20, "21": 21, "22": 22, "23": 23,
-  "24": 24, "25": 25
-};
-
-const handleRecharge = async (req, res) => {
-  try {
-    const { mobile, amount, operator, client_id, endpoint_type } = req.body;
-
-    if (!mobile || !amount || !operator) {
-      return res.status(400).json({ 
-        status: "failure", 
-        message: "Missing required fields: mobile, amount, or operator." 
-      });
-    }
-
-    const cleanMobile = String(mobile).trim();
-    const txn_id = client_id || "TXN_" + Date.now();
-
-    const normalizedOperator = String(operator).trim().toLowerCase();
-    let provider_id = OPERATOR_IDS[normalizedOperator] || Number(operator);
-
-    if (!provider_id || isNaN(provider_id) || provider_id === 10) {
-      provider_id = 1; 
-    }
-
-    const payload = {
-      client_id: txn_id,
-      provider_id: Number(provider_id),
-      number: cleanMobile,
-      amount: Number(amount)
-    };
-
-    let apiEndpoint = `${PAY2ALL_BASE_URL}/recharge`;
-    if (endpoint_type === 'bill') {
-      apiEndpoint = `${PAY2ALL_BASE_URL}/bill-pay`;
-    }
-
-    console.log(`Sending payload to Pay2All (${apiEndpoint}):`, payload);
-
-    const response = await axios.post(apiEndpoint, payload, {
-      headers: {
-        'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    console.log("Pay2All Success Response:", response.data);
-    return res.json(response.data);
-
-  } catch (error) {
-    console.error("Pay2All API Error Response:", error.response?.data || error.message);
-    return res.status(500).json({
-      status: "failure",
-      message: error.response?.data?.message || error.message,
-      details: error.response?.data || null
-    });
+{
+  "name": "pay2all-server",
+  "version": "1.0.0",
+  "description": "Pay2All Integration Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   }
-};
-
-app.post('/api/recharge', handleRecharge);
-app.post('/recharge', handleRecharge);
-
-app.get('/', (req, res) => {
-  res.send("Server is running successfully!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-
+}
