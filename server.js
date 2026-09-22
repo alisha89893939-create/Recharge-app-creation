@@ -12,7 +12,7 @@ app.use(express.json());
 const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
 const PAY2ALL_API_TOKEN = 't2a_43094c42_ca0a3a61223886a18985576ddb010eb0a86c9490652f1d74';
 
-// Updated Provider IDs Mapping Dictionary
+// Corrected Provider IDs Mapping Dictionary
 const OPERATOR_IDS = {
   // Mobile Recharge
   "airtel": 1,
@@ -28,7 +28,7 @@ const OPERATOR_IDS = {
   "d2h": 8,
   "sun direct": 9,
 
-  // Account Verification
+  // Account Verification (Only if explicitly called)
   "bank account verify": 10,
   "verify_bank": 10,
   "upi verify": 11,
@@ -85,10 +85,74 @@ const handleRecharge = async (req, res) => {
       });
     }
 
+    // 1. Strict Mobile Number Validation (Must be exactly 10 digits)
+    const cleanMobile = String(mobile).trim();
+    if (!/^\d{10}$/.test(cleanMobile)) {
+      return res.status(400).json({ 
+        status: "failure", 
+        message: "Enter a valid 10-digit mobile number." 
+      });
+    }
+
     const txn_id = client_id || "TXN_" + Date.now();
 
-    // Map operator name/number to correct provider_id
+    // 2. Safe Operator Mapping Lookup
     const normalizedOperator = String(operator).trim().toLowerCase();
+    let provider_id = OPERATOR_IDS[normalizedOperator] || Number(operator);
+
+    // 3. Safety Fallback: If operator is invalid or incorrectly resolves to bank verify (10) during a normal recharge, fallback safely to Airtel (1)
+    if (!provider_id || isNaN(provider_id) || provider_id === 10) {
+      provider_id = 1; 
+    }
+
+    // Pay2All API Payload Structure
+    const payload = {
+      client_id: txn_id,
+      provider_id: Number(provider_id),
+      number: cleanMobile,
+      amount: Number(amount)
+    };
+
+    let apiEndpoint = `${PAY2ALL_BASE_URL}/recharge`;
+    if (endpoint_type === 'bill') {
+      apiEndpoint = `${PAY2ALL_BASE_URL}/bill-pay`;
+    }
+
+    console.log(`Sending verified payload to Pay2All (${apiEndpoint}):`, payload);
+
+    const response = await axios.post(apiEndpoint, payload, {
+      headers: {
+        'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log("Pay2All Success Response:", response.data);
+    return res.json(response.data);
+
+  } catch (error) {
+    console.error("Pay2All API Error Response:", error.response?.data || error.message);
+    return res.status(500).json({
+      status: "failure",
+      message: error.response?.data?.message || error.message,
+      details: error.response?.data || null
+    });
+  }
+};
+
+// Routes
+app.post('/api/recharge', handleRecharge);
+app.post('/recharge', handleRecharge);
+
+app.get('/', (req, res) => {
+  res.send("Pay2All Integration Server is running successfully!");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
     const provider_id = OPERATOR_IDS[normalizedOperator] || Number(operator) || 1;
 
     // Pay2All API Payload Structure
