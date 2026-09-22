@@ -12,7 +12,7 @@ app.use(express.json());
 const PAY2ALL_BASE_URL = 'https://pay2all.in/api/v1';
 const PAY2ALL_API_TOKEN = 't2a_43094c42_ca0a3a61223886a18985576ddb010eb0a86c9490652f1d74';
 
-// Updated Provider IDs Mapping Dictionary (Screenshots & Support List ke mutabiq)
+// Updated Provider IDs Mapping Dictionary
 const OPERATOR_IDS = {
   // Mobile Recharge
   "airtel": 1,
@@ -67,42 +67,29 @@ const OPERATOR_IDS = {
   "acd": 25,
 
   // Direct Number keys mapping
-  "1": 1,
-  "2": 2,
-  "3": 3,
-  "4": 4,
-  "5": 5,
-  "6": 6,
-  "7": 7,
-  "8": 8,
-  "9": 9,
-  "10": 10,
-  "11": 11,
-  "13": 13,
-  "14": 14,
-  "15": 15,
-  "16": 16,
-  "17": 17,
-  "20": 20,
-  "21": 21,
-  "22": 22,
-  "23": 23,
-  "24": 24,
-  "25": 25
+  "1": 1, "2": 2, "3": 3, "4": 4, "5": 5,
+  "6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
+  "11": 11, "13": 13, "14": 14, "15": 15, "16": 16,
+  "17": 17, "20": 20, "21": 21, "22": 22, "23": 23,
+  "24": 24, "25": 25
 };
 
 const handleRecharge = async (req, res) => {
   try {
-    const { mobile, amount, operator, client_id } = req.body;
+    const { mobile, amount, operator, client_id, endpoint_type } = req.body;
 
     if (!mobile || !amount || !operator) {
-      return res.status(400).json({ status: "failure", message: "Missing required fields" });
+      return res.status(400).json({ 
+        status: "failure", 
+        message: "Missing required fields: mobile, amount, or operator are required." 
+      });
     }
 
     const txn_id = client_id || "TXN_" + Date.now();
 
-    // Operator name ya number se exact provider_id nikalna
-    const provider_id = OPERATOR_IDS[String(operator).toLowerCase()] || Number(operator) || 1;
+    // Map operator name/number to correct provider_id
+    const normalizedOperator = String(operator).trim().toLowerCase();
+    const provider_id = OPERATOR_IDS[normalizedOperator] || Number(operator) || 1;
 
     // Pay2All API Payload Structure
     const payload = {
@@ -112,10 +99,15 @@ const handleRecharge = async (req, res) => {
       amount: Number(amount)
     };
 
-    console.log("Sending payload to Pay2All:", payload);
+    // Determine API endpoint based on request type or default to /recharge
+    let apiEndpoint = `${PAY2ALL_BASE_URL}/recharge`;
+    if (endpoint_type === 'bill') {
+      apiEndpoint = `${PAY2ALL_BASE_URL}/bill-pay`; // Agar bill payment ho toh endpoint adjust karein
+    }
 
-    // Pay2All live API Request with correct token and headers
-    const response = await axios.post(`${PAY2ALL_BASE_URL}/recharge`, payload, {
+    console.log(`Sending payload to Pay2All (${apiEndpoint}):`, payload);
+
+    const response = await axios.post(apiEndpoint, payload, {
       headers: {
         'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
         'Content-Type': 'application/json',
@@ -130,17 +122,21 @@ const handleRecharge = async (req, res) => {
     console.error("Pay2All API Error Response:", error.response?.data || error.message);
     return res.status(500).json({
       status: "failure",
-      message: error.response?.data?.message || error.message
+      message: error.response?.data?.message || error.message,
+      details: error.response?.data || null
     });
   }
 };
 
-// Map both /api/recharge and /recharge routes
+// Routes
 app.post('/api/recharge', handleRecharge);
 app.post('/recharge', handleRecharge);
+
+app.get('/', (req, res) => {
+  res.send("Pay2All Integration Server is running successfully!");
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
 
