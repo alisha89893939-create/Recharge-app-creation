@@ -144,6 +144,41 @@ app.post('/recharge', handleTransaction);
 app.post('/api/bill-pay', handleTransaction);
 
 app.get('/', (req, res) => {
+  res.send("Pay2All Multi-Service Server is running successfully!");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+
+    const response = await axios.post(apiEndpoint, payload, {
+      headers: {
+        'Authorization': `Bearer ${PAY2ALL_API_TOKEN}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log("Pay2All Success Response:", response.data);
+    return res.json(response.data);
+
+  } catch (error) {
+    console.error("Pay2All API Error Response:", error.response?.data || error.message);
+    return res.status(500).json({
+      status: "failure",
+      message: error.response?.data?.message || error.message,
+      details: error.response?.data || null
+    });
+  }
+};
+
+// API Routes
+app.post('/api/recharge', handleTransaction);
+app.post('/recharge', handleTransaction);
+app.post('/api/bill-pay', handleTransaction);
+
+app.get('/', (req, res) => {
   res.send("Pay2All Multi-Service Server (Recharge, DTH, Electricity, Bank Verify) is running successfully!");
 });
 
